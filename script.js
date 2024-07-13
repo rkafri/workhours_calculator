@@ -1,96 +1,115 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const calculateBtn = document.getElementById('calculateBtn');
-    const resultDiv = document.getElementById('result');
-    const tableSection = document.querySelector('.table-section');
-
-    calculateBtn.addEventListener('click', calculateWorkHours);
-
-    function calculateWorkHours() {
-        const startTime = document.getElementById('startTime').value;
-        const firstEndTime = document.getElementById('firstEndTime').value;
-        const firstReturnTime = document.getElementById('firstReturnTime').value;
-        const secondEndTime = document.getElementById('secondEndTime').value;
-        const secondReturnTime = document.getElementById('secondReturnTime').value;
-
-        if (!startTime) {
-            alert('נא להזין שעת כניסה');
-            return;
+function calculateEndTime() {
+    const startTime = document.getElementById('startTime').value;
+    const firstExitTime = document.getElementById('firstExitTime').value;
+    const firstReturnTime = document.getElementById('firstReturnTime').value;
+    const secondExitTime = document.getElementById('secondExitTime').value;
+    const secondReturnTime = document.getElementById('secondReturnTime').value;
+    
+    if (!startTime) {
+        alert('נא להזין שעת כניסה');
+        return;
+    }
+    
+    let totalWorkMinutes = 0;
+    let currentTime = new Date(`2000-01-01T${startTime}`);
+    const targetWorkMinutes = 8 * 60; // 8 שעות עבודה
+    
+    // הגדרת ההפסקות הקבועות
+    const breaks = [
+        { start: new Date(`2000-01-01T09:15`), end: new Date(`2000-01-01T09:30`) },
+        { start: new Date(`2000-01-01T12:15`), end: new Date(`2000-01-01T12:45`) }
+    ];
+    
+    // הוספת ההפסקות שהוזנו על ידי המשתמש (רק אם הוזנו)
+    if (firstExitTime && firstReturnTime) {
+        breaks.push({ 
+            start: new Date(`2000-01-01T${firstExitTime}`), 
+            end: new Date(`2000-01-01T${firstReturnTime}`) 
+        });
+    }
+    if (secondExitTime && secondReturnTime) {
+        breaks.push({ 
+            start: new Date(`2000-01-01T${secondExitTime}`), 
+            end: new Date(`2000-01-01T${secondReturnTime}`) 
+        });
+    }
+    
+    // מיון ההפסקות לפי זמן התחלה
+    breaks.sort((a, b) => a.start - b.start);
+    
+    while (totalWorkMinutes < targetWorkMinutes) {
+        let nextBreakStart = null;
+        let isInBreak = false;
+        
+        // בדיקה אם הזמן הנוכחי הוא בתוך הפסקה
+        for (let breakTime of breaks) {
+            if (currentTime >= breakTime.start && currentTime < breakTime.end) {
+                currentTime = new Date(breakTime.end);
+                isInBreak = true;
+                break;
+            } else if (currentTime < breakTime.start) {
+                nextBreakStart = breakTime.start;
+                break;
+            }
         }
-
-        let totalWorkMinutes = 0;
-        let breaks = [];
-
-        const addTimeRange = (start, end) => {
-            if (start && end) {
-                const diff = getTimeDifferenceInMinutes(start, end);
-                totalWorkMinutes += diff;
-                return diff;
+        
+        if (!isInBreak) {
+            if (nextBreakStart) {
+                let workMinutes = Math.min(
+                    (nextBreakStart - currentTime) / (1000 * 60),
+                    targetWorkMinutes - totalWorkMinutes
+                );
+                totalWorkMinutes += workMinutes;
+                currentTime = new Date(currentTime.getTime() + workMinutes * 60 * 1000);
+            } else {
+                // אם אין עוד הפסקות, נוסיף את שאר זמן העבודה
+                let remainingMinutes = targetWorkMinutes - totalWorkMinutes;
+                totalWorkMinutes += remainingMinutes;
+                currentTime = new Date(currentTime.getTime() + remainingMinutes * 60 * 1000);
             }
-            return 0;
-        };
-
-        const mainWork = addTimeRange(startTime, firstEndTime || secondEndTime || '');
-        const firstBreak = addTimeRange(firstEndTime, firstReturnTime);
-        const secondWork = addTimeRange(firstReturnTime, secondEndTime);
-        const secondBreak = addTimeRange(secondEndTime, secondReturnTime);
-
-        if (firstBreak > 0) breaks.push(firstBreak);
-        if (secondBreak > 0) breaks.push(secondBreak);
-
-        const endTime = calculateEndTime(startTime, totalWorkMinutes);
-
-        displayResult(totalWorkMinutes, endTime);
-        createWorkHoursTable(startTime, firstEndTime, firstReturnTime, secondEndTime, secondReturnTime, endTime, breaks);
+        }
     }
+    
+    const formattedEndTime = currentTime.toTimeString().slice(0, 5);
+    document.getElementById('result').innerHTML = `שעת סיום העבודה: ${formattedEndTime}`;
 
-    function getTimeDifferenceInMinutes(start, end) {
-        const diff = new Date('2000-01-01T' + end) - new Date('2000-01-01T' + start);
-        return Math.round(diff / 60000);
-    }
+    // עדכון הטבלה
+    updateHoursTable(new Date(`2000-01-01T${startTime}`), currentTime);
+}
 
-    function calculateEndTime(start, totalMinutes) {
-        const endTime = new Date('2000-01-01T' + start);
-        endTime.setMinutes(endTime.getMinutes() + totalMinutes);
-        return endTime.toTimeString().slice(0, 5);
-    }
+function updateHoursTable(startTime, endTime) {
+    const tableBody = document.querySelector('#hoursTable tbody');
+    tableBody.innerHTML = ''; // ניקוי הטבלה
 
-    function displayResult(totalMinutes, endTime) {
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        resultDiv.textContent = `סך הכל שעות עבודה: ${hours} שעות ו-${minutes} דקות. שעת סיום: ${endTime}`;
-    }
+    const standardWorkTime = 8 * 60; // 8 שעות בדקות
+    const intervals = [120, 105, 90, 75, 60, 45, 30, 15, 0, -15, -30, -45, -60, -75, -90, -105, -120]; // מדרגות של 15 דקות, סדר הפוך
 
-    function createWorkHoursTable(start, firstEnd, firstReturn, secondEnd, secondReturn, end, breaks) {
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <tr>
-                <th>כניסה</th>
-                <th>יציאה</th>
-                <th>משך זמן</th>
-                <th>סוג</th>
-            </tr>
-        `;
+    intervals.forEach((interval, index) => {
+        const adjustedTime = new Date(endTime.getTime() + interval * 60000);
+        const workTime = (adjustedTime - startTime) / (1000 * 60);
+        const difference = workTime - standardWorkTime;
 
-        const addRow = (start, end, type) => {
-            if (start && end) {
-                const duration = getTimeDifferenceInMinutes(start, end);
-                const row = table.insertRow();
-                row.innerHTML = `
-                    <td>${start}</td>
-                    <td>${end}</td>
-                    <td>${Math.floor(duration / 60)} שעות ${duration % 60} דקות</td>
-                    <td>${type}</td>
-                `;
-            }
-        };
+        const row = tableBody.insertRow();
+        const cellOvertime = row.insertCell(0);
+        const cellEndTime = row.insertCell(1);
 
-        addRow(start, firstEnd || secondEnd || end, 'עבודה');
-        if (firstEnd) addRow(firstEnd, firstReturn, 'הפסקה');
-        if (firstReturn) addRow(firstReturn, secondEnd || end, 'עבודה');
-        if (secondEnd) addRow(secondEnd, secondReturn, 'הפסקה');
-        if (secondReturn) addRow(secondReturn, end, 'עבודה');
+        if (interval === 0) {
+            cellOvertime.textContent = adjustedTime.toTimeString().slice(0, 5);
+            cellEndTime.textContent = "";
+            row.className = 'standard-time';
+            cellOvertime.colSpan = 2;
+            cellEndTime.style.display = 'none';
+        } else {
+            cellOvertime.textContent = formatTimeDifference(interval);
+            cellEndTime.textContent = adjustedTime.toTimeString().slice(0, 5);
+            row.className = interval > 0 ? 'overtime' : 'undertime';
+        }
+    });
+}
 
-        tableSection.innerHTML = '';
-        tableSection.appendChild(table);
-    }
-});
+function formatTimeDifference(minutes) {
+    const hours = Math.floor(Math.abs(minutes) / 60);
+    const mins = Math.abs(minutes) % 60;
+    const sign = minutes < 0 ? '-' : '+';
+    return `${sign}${hours}:${mins.toString().padStart(2, '0')}`;
+}
