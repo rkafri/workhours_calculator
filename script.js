@@ -84,7 +84,7 @@ function updateHoursTable(startTime, endTime) {
     const standardWorkTime = 8 * 60; // 8 שעות בדקות
     const intervals = [120, 105, 90, 75, 60, 45, 30, 15, 0, -15, -30, -45, -60, -75, -90, -105, -120]; // מדרגות של 15 דקות, סדר הפוך
 
-    intervals.forEach((interval, index) => {
+    intervals.forEach((interval) => {
         const adjustedTime = new Date(endTime.getTime() + interval * 60000);
         const workTime = (adjustedTime - startTime) / (1000 * 60);
         const difference = workTime - standardWorkTime;
