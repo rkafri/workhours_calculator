@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InOutAi</title>
+    <link rel="stylesheet" href="styles1.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">InOutAi</h1>
+        <h2>מחשבון שעות עבודה מלא</h2>
+        <div class="input-container">
+            <div class="input-section">
+                <label for="entryTime">שעת כניסה:</label>
+                <input type="time" id="entryTime" required>
+                
+                <label for="firstExitTime">שעת יציאה ראשונה: <span class="optional">(אופציונלי)</span></label>
+                <input type="time" id="firstExitTime">
+                
+                <label for="firstReturnTime">שעת חזרה ראשונה: <span class="optional">(אופציונלי)</span></label>
+                <input type="time" id="firstReturnTime">
+                
+                <label for="secondExitTime">שעת יציאה שנייה: <span class="optional">(אופציונלי)</span></label>
+                <input type="time" id="secondExitTime">
+                
+                <label for="secondReturnTime">שעת חזרה שנייה: <span class="optional">(אופציונלי)</span></label>
+                <input type="time" id="secondReturnTime">
+                
+                <button onclick="calculateEndTime()">חשב שעת סיום</button>
+            </div>
+            <div id="result"></div>
+        </div>
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>יום</th>
+                        <th>שעות נוספות</th>
+                        <th>שעות חסרות</th>
+                    </tr>
+                </thead>
+                <tbody id="hoursTable">
+                    <!-- שורות הטבלה יתווספו כאן באמצעות JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
