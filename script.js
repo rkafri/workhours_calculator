@@ -1,96 +1,78 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const calculateBtn = document.getElementById('calculateBtn');
-    const resultDiv = document.getElementById('result');
-    const tableSection = document.querySelector('.table-section');
+function calculateEndTime() {
+    const entryTime = document.getElementById('entryTime').value;
+    const firstExitTime = document.getElementById('firstExitTime').value;
+    const firstReturnTime = document.getElementById('firstReturnTime').value;
+    const secondExitTime = document.getElementById('secondExitTime').value;
+    const secondReturnTime = document.getElementById('secondReturnTime').value;
 
-    calculateBtn.addEventListener('click', calculateWorkHours);
+    if (!entryTime) {
+        alert('נא להזין שעת כניסה');
+        return;
+    }
 
-    function calculateWorkHours() {
-        const startTime = document.getElementById('startTime').value;
-        const firstEndTime = document.getElementById('firstEndTime').value;
-        const firstReturnTime = document.getElementById('firstReturnTime').value;
-        const secondEndTime = document.getElementById('secondEndTime').value;
-        const secondReturnTime = document.getElementById('secondReturnTime').value;
+    let totalWorkMinutes = 0;
+    let currentTime = new Date(`2000-01-01T${entryTime}`);
+    let endTime = new Date(`2000-01-01T${entryTime}`);
+    endTime.setHours(endTime.getHours() + 9); // Set end time to 9 hours after entry
 
-        if (!startTime) {
-            alert('נא להזין שעת כניסה');
-            return;
+    if (firstExitTime) {
+        const exitTime = new Date(`2000-01-01T${firstExitTime}`);
+        totalWorkMinutes += (exitTime - currentTime) / 60000;
+        
+        if (firstReturnTime) {
+            const returnTime = new Date(`2000-01-01T${firstReturnTime}`);
+            endTime = new Date(endTime.getTime() + (returnTime - exitTime));
+            currentTime = returnTime;
+        } else {
+            currentTime = exitTime;
         }
-
-        let totalWorkMinutes = 0;
-        let breaks = [];
-
-        const addTimeRange = (start, end) => {
-            if (start && end) {
-                const diff = getTimeDifferenceInMinutes(start, end);
-                totalWorkMinutes += diff;
-                return diff;
-            }
-            return 0;
-        };
-
-        const mainWork = addTimeRange(startTime, firstEndTime || secondEndTime || '');
-        const firstBreak = addTimeRange(firstEndTime, firstReturnTime);
-        const secondWork = addTimeRange(firstReturnTime, secondEndTime);
-        const secondBreak = addTimeRange(secondEndTime, secondReturnTime);
-
-        if (firstBreak > 0) breaks.push(firstBreak);
-        if (secondBreak > 0) breaks.push(secondBreak);
-
-        const endTime = calculateEndTime(startTime, totalWorkMinutes);
-
-        displayResult(totalWorkMinutes, endTime);
-        createWorkHoursTable(startTime, firstEndTime, firstReturnTime, secondEndTime, secondReturnTime, endTime, breaks);
     }
 
-    function getTimeDifferenceInMinutes(start, end) {
-        const diff = new Date('2000-01-01T' + end) - new Date('2000-01-01T' + start);
-        return Math.round(diff / 60000);
+    if (secondExitTime && firstReturnTime) {
+        const exitTime = new Date(`2000-01-01T${secondExitTime}`);
+        totalWorkMinutes += (exitTime - currentTime) / 60000;
+        
+        if (secondReturnTime) {
+            const returnTime = new Date(`2000-01-01T${secondReturnTime}`);
+            endTime = new Date(endTime.getTime() + (returnTime - exitTime));
+            currentTime = returnTime;
+        } else {
+            currentTime = exitTime;
+        }
     }
 
-    function calculateEndTime(start, totalMinutes) {
-        const endTime = new Date('2000-01-01T' + start);
-        endTime.setMinutes(endTime.getMinutes() + totalMinutes);
-        return endTime.toTimeString().slice(0, 5);
+    const remainingMinutes = (endTime - currentTime) / 60000;
+
+    if (remainingMinutes <= 0) {
+        document.getElementById('result').innerHTML = 'זמן העבודה הושלם';
+        updateHoursTable(Math.abs(remainingMinutes / 60), 0);
+    } else {
+        const formattedEndTime = endTime.toTimeString().slice(0, 5);
+        document.getElementById('result').innerHTML = `שעת סיום מחושבת: ${formattedEndTime}`;
+        updateHoursTable(0, remainingMinutes / 60);
     }
+}
 
-    function displayResult(totalMinutes, endTime) {
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        resultDiv.textContent = `סך הכל שעות עבודה: ${hours} שעות ו-${minutes} דקות. שעת סיום: ${endTime}`;
+function updateHoursTable(overtimeHours, missingHours) {
+    const table = document.getElementById('hoursTable');
+    table.innerHTML = ''; // Clear existing rows
+
+    const today = new Date().toLocaleDateString('he-IL', { weekday: 'long' });
+    const row = table.insertRow();
+    
+    const dayCell = row.insertCell(0);
+    const overtimeCell = row.insertCell(1);
+    const missingCell = row.insertCell(2);
+
+    dayCell.textContent = today;
+    
+    if (overtimeHours > 0) {
+        overtimeCell.textContent = overtimeHours.toFixed(2);
+        overtimeCell.classList.add('overtime');
+        missingCell.textContent = '0.00';
+    } else {
+        overtimeCell.textContent = '0.00';
+        missingCell.textContent = missingHours.toFixed(2);
+        missingCell.classList.add('missing');
     }
-
-    function createWorkHoursTable(start, firstEnd, firstReturn, secondEnd, secondReturn, end, breaks) {
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <tr>
-                <th>כניסה</th>
-                <th>יציאה</th>
-                <th>משך זמן</th>
-                <th>סוג</th>
-            </tr>
-        `;
-
-        const addRow = (start, end, type) => {
-            if (start && end) {
-                const duration = getTimeDifferenceInMinutes(start, end);
-                const row = table.insertRow();
-                row.innerHTML = `
-                    <td>${start}</td>
-                    <td>${end}</td>
-                    <td>${Math.floor(duration / 60)} שעות ${duration % 60} דקות</td>
-                    <td>${type}</td>
-                `;
-            }
-        };
-
-        addRow(start, firstEnd || secondEnd || end, 'עבודה');
-        if (firstEnd) addRow(firstEnd, firstReturn, 'הפסקה');
-        if (firstReturn) addRow(firstReturn, secondEnd || end, 'עבודה');
-        if (secondEnd) addRow(secondEnd, secondReturn, 'הפסקה');
-        if (secondReturn) addRow(secondReturn, end, 'עבודה');
-
-        tableSection.innerHTML = '';
-        tableSection.appendChild(table);
-    }
-});
+}
