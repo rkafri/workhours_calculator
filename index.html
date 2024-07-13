@@ -3,41 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחשבון שעות עבודה - InOutAi</title>
+    <title>מחשבון שעות עבודה מלא</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2 class="page-title">InOutAi</h2>
     <div class="container">
         <h1>מחשבון שעות עבודה מלא</h1>
         <div class="input-container">
             <div class="input-section">
                 <label for="startTime">שעת כניסה:</label>
                 <input type="time" id="startTime" required>
-                
-                <label for="firstExitTime">שעת יציאה ראשונה: <span class="optional">(אופציונלי)</span></label>
-                <input type="time" id="firstExitTime">
-                
-                <label for="firstReturnTime">שעת חזרה ראשונה: <span class="optional">(אופציונלי)</span></label>
+
+                <label for="firstEndTime">שעת יציאה ראשונה:</label>
+                <input type="time" id="firstEndTime">
+
+                <label for="firstReturnTime">שעת חזרה ראשונה:</label>
                 <input type="time" id="firstReturnTime">
-                
-                <label for="secondExitTime">שעת יציאה שנייה: <span class="optional">(אופציונלי)</span></label>
-                <input type="time" id="secondExitTime">
-                
-                <label for="secondReturnTime">שעת חזרה שנייה: <span class="optional">(אופציונלי)</span></label>
+
+                <label for="secondEndTime">שעת יציאה שנייה:</label>
+                <input type="time" id="secondEndTime">
+
+                <label for="secondReturnTime">שעת חזרה שנייה:</label>
                 <input type="time" id="secondReturnTime">
-                
-                <button onclick="calculateEndTime()">חשב שעת סיום</button>
-                
-                <div id="result"></div>
+
+                <button id="calculateBtn">חשב שעת סיום</button>
             </div>
-            <div class="table-section">
-                <table id="hoursTable">
-                    <tbody>
-                        <!-- טבלה תתמלא דינמית ע"י JavaScript -->
-                    </tbody>
-                </table>
-            </div>
+            <div id="result"></div>
+        </div>
+        <div class="table-section">
+            <!-- Table will be dynamically generated here -->
         </div>
     </div>
     <script src="script.js"></script>
