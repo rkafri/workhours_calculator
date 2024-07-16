@@ -1,84 +1,112 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #00a86b;
-    color: #ffffff;
     margin: 0;
     padding: 20px;
+    background-color: #f0f0f0;
+}
+
+.page-title {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.8em;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
     max-width: 800px;
-    margin: 0 auto;
+    margin: 20px auto 0;
 }
 
-.clock {
-    font-size: 48px;
-    font-weight: bold;
+h1 {
+    color: #333;
     text-align: center;
-    margin-bottom: 20px;
 }
 
-.columns {
+.input-container {
     display: flex;
     justify-content: space-between;
 }
 
-.column {
-    flex: 1;
+.input-section {
+    width: 48%;
 }
 
-.column h2 {
-    text-align: center;
-    margin-bottom: 10px;
+.table-section {
+    width: 48%;
 }
 
 .input-box {
-    background-color: #ffffff;
-    border: 1px solid #cccccc;
-    padding: 5px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
 }
 
-.timeline {
-    position: relative;
-    height: 400px;
-    margin: 20px 0;
+label {
+    display: block;
+    margin-top: 10px;
 }
 
-.timeline-bar {
-    position: absolute;
-    left: 50%;
-    width: 4px;
-    height: 100%;
-    background-color: #ffffff;
+input[type="time"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-.timeline-marker {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #ffff00;
-    padding: 5px 10px;
-    white-space: nowrap;
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
 }
 
-.timeline-times {
-    position: absolute;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
+button:hover {
+    background-color: #45a049;
 }
 
-.timeline-time {
-    flex: 1;
+#result {
+    margin-top: 20px;
+    font-weight: bold;
     text-align: center;
 }
 
-.timeline-time.positive {
-    color: #ffffff;
+.optional {
+    color: #888;
+    font-size: 0.9em;
 }
 
-.timeline-time.negative {
-    color: #ff0000;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.overtime {
+    background-color: #e6ffe6;
+}
+
+.undertime {
+    background-color: #ffe6e6;
+}
+
+.standard-time {
+    background-color: #ffffd9;
+    font-weight: bold;
 }
